@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Credit Score Predictor</title>
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+    />
+    <link
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css"
+      rel="stylesheet"
+    />
+    <style>
+      body {
+        background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+        min-height: 100vh;
+      }
+      .card {
+        border: none;
+        border-radius: 15px;
+        box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
+      }
+      .form-control {
+        border-radius: 10px;
+        padding: 0.75rem;
+      }
+      .btn-primary {
+        border-radius: 10px;
+        padding: 0.75rem 2rem;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        border: none;
+      }
+      .result-card {
+        display: none;
+        transition: all 0.3s ease;
+      }
+      .credit-score {
+        font-size: 3rem;
+        font-weight: bold;
+      }
+      .credit-level {
+        font-size: 1.5rem;
+        padding: 0.5rem 1rem;
+        border-radius: 10px;
+      }
+      .level-Poor {
+        background-color: #ffecec;
+        color: #dc3545;
+      }
+      .level-Standard {
+        background-color: #fff3cd;
+        color: #856404;
+      }
+      .level-Good {
+        background-color: #d4edda;
+        color: #155724;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container py-5">
+      <div class="row justify-content-center">
+        <div class="col-lg-8">
+          <div class="card mb-4">
+            <div class="card-body p-4">
+              <h2 class="text-center mb-4">Credit Score Predictor</h2>
+              <form id="creditScoreForm">
+                <div class="row g-3">
+                  <div class="col-md-6">
+                    <div class="form-floating">
+                      <input
+                        type="number"
+                        class="form-control"
+                        id="age"
+                        name="Age"
+                        placeholder="Age"
+                      />
+                      <label for="age">Age</label>
+                    </div>
+                  </div>
+                  <div class="col-md-6">
+                    <div class="form-floating">
+                      <input
+                        type="number"
+                        class="form-control"
+                        id="annualIncome"
+                        name="Annual_Income"
+                        placeholder="Annual Income"
+                      />
+                      <label for="annualIncome">Annual Income</label>
+                    </div>
+                  </div>
+                  <div class="col-md-6">
+                    <div class="form-floating">
+                      <input
+                        type="number"
+                        class="form-control"
+                        id="delayDays"
+                        name="Delay_from_due_date"
+                        placeholder="Delay from due date"
+                      />
+                      <label for="delayDays">Delay from due date (days)</label>
+                    </div>
+                  </div>
+                  <div class="col-md-6">
+                    <div class="form-floating">
+                      <input
+                        type="number"
+                        class="form-control"
+                        id="delayedPayments"
+                        name="Num_of_Delayed_Payment"
+                        placeholder="Number of Delayed Payments"
+                      />
+                      <label for="delayedPayments"
+                        >Number of Delayed Payments</label
+                      >
+                    </div>
+                  </div>
+                  <div class="col-md-6">
+                    <div class="form-floating">
+                      <input
+                        type="number"
+                        class="form-control"
+                        id="creditInquiries"
+                        name="Num_Credit_Inquiries"
+                        placeholder="Number of Credit Inquiries"
+                      />
+                      <label for="creditInquiries"
+                        >Number of Credit Inquiries</label
+                      >
+                    </div>
+                  </div>
+                  <div class="col-md-6">
+                    <div class="form-floating">
+                      <input
+                        type="number"
+                        class="form-control"
+                        id="outstandingDebt"
+                        name="Outstanding_Debt"
+                        placeholder="Outstanding Debt"
+                      />
+                      <label for="outstandingDebt">Outstanding Debt</label>
+                    </div>
+                  </div>
+                  <div class="col-md-6">
+                    <div class="form-floating">
+                      <input
+                        type="number"
+                        class="form-control"
+                        id="emiPerMonth"
+                        name="Total_EMI_per_month"
+                        placeholder="Total EMI per month"
+                      />
+                      <label for="emiPerMonth">Total EMI per month</label>
+                    </div>
+                  </div>
+                  <div class="col-md-6">
+                    <div class="form-floating">
+                      <input
+                        type="number"
+                        class="form-control"
+                        id="creditAge"
+                        name="Credit_Age_years"
+                        placeholder="Credit Age (years)"
+                      />
+                      <label for="creditAge">Credit Age (years)</label>
+                    </div>
+                  </div>
+                </div>
+                <div class="text-center mt-4">
+                  <button type="submit" class="btn btn-primary btn-lg">
+                    <i class="fas fa-calculator me-2"></i>Calculate Score
+                  </button>
+                </div>
+              </form>
+            </div>
+          </div>
+
+          <div class="card result-card">
+            <div class="card-body text-center p-4">
+              <h3 class="mb-4">Your Predicted Credit Score</h3>
+              <div class="credit-score mb-3"></div>
+              <div class="credit-level d-inline-block mb-3"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+      document
+        .getElementById("creditScoreForm")
+        .addEventListener("submit", async (e) => {
+          e.preventDefault();
+          const form = e.target;
+          const formData = new FormData(form);
+          const data = Object.fromEntries(formData.entries());
+
+          // Convert values to numbers
+          for (let key in data) {
+            data[key] = data[key] === "" ? null : Number(data[key]);
+          }
+
+          try {
+            const response = await fetch("http://localhost:8000/predict", {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json",
+              },
+              body: JSON.stringify(data),
+            });
+
+            const result = await response.json();
+
+            const resultCard = document.querySelector(".result-card");
+            const scoreElement = resultCard.querySelector(".credit-score");
+            const levelElement = resultCard.querySelector(".credit-level");
+
+            scoreElement.textContent = result.credit_score;
+            levelElement.textContent = result.credit_level;
+            levelElement.className =
+              "credit-level level-" + result.credit_level;
+
+            resultCard.style.display = "block";
+            resultCard.scrollIntoView({ behavior: "smooth" });
+          } catch (error) {
+            alert("Error calculating credit score. Please try again.");
+            console.error("Error:", error);
+          }
+        });
+    </script>
+  </body>
+</html>

@@ -106,3 +106,43 @@ Given that decision trees naturally partition continuous features, explicit binn
 ## 4. Conclusion
 
 The custom TGAMT approach presented in this paper combines decision tree segmentation with local GAM fitting to produce transparent, interpretable credit scores. Two variants were discussed: one that applies explicit binning to reduce noise, and one that leverages the inherent adaptive binning of decision trees. While explicit binning can help in cases of high noise, it may also remove useful detail. The choice between the two methods should be guided by the characteristics of the data. Calibration and hyperparameter tuning are crucial to ensure that the final credit scores align with traditional ranges and accurately reflect credit risk.
+
+
+
+
+
+
+## Running the Project
+
+### Setup and Installation
+1. Install the required Python packages:
+```bash
+pip install -r requirements.txt
+```
+
+### Running the Application
+1. Start the FastAPI backend:
+```bash
+uvicorn api:app --reload
+```
+The API server will start at http://localhost:8000, docs http://localhost:8000/docs
+
+2. For the webapp:
+   - Simply open `/webapp/index.html` in a web browser
+   - No additional server is needed as it's a static HTML file
+
+### Accessing the Application
+1. Open your web browser and navigate to the `index.html` file
+2. Fill in the credit scoring parameters:
+   - Age
+   - Annual Income
+   - Delay from due date
+   - Number of Delayed Payments
+   - Number of Credit Inquiries
+   - Outstanding Debt
+   - Total EMI per month
+   - Credit Age (years)
+3. Click "Calculate Score" to get your credit score prediction
+
+
+Note: Ensure the FastAPI backend is running before using the webapp.
