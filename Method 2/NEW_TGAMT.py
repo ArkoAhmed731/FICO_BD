@@ -6,15 +6,19 @@ from pygam import LinearGAM, s
 from functools import reduce
 import operator
 from sklearn.model_selection import train_test_split
+import pickle
+import os
+
 
 # =====================================
-# 1. Load Training and Testing Data
+# 1. Load Training Data and Split
 # =====================================
 train_path = r"Dataset for method 2\data_train.csv"
-test_path = r"Dataset for method 2\data_test.csv"
+df = pd.read_csv(train_path)
 
-df_train = pd.read_csv(train_path)
-df_test = pd.read_csv(test_path)
+# Split the data before any preprocessing
+df_train, df_test = train_test_split(df, test_size=0.2, random_state=42)
+print(f"Training set size: {len(df_train)}, Test set size: {len(df_test)}")
 
 # =====================================
 # 2. Define and Clean Numeric Features
@@ -50,16 +54,16 @@ df_test[numeric_features] = imputer.transform(df_test[numeric_features])
 # Map the target "Credit_Score" using the desired mapping.
 mapping = {
     "Poor": 350,
-    "Fair": 550,
-    "Good": 650,
-    "Very Good": 720,
-    "Excellent": 850
+    "Good": 850,
+    "Standard": 600
 }
+
 df_train["Credit_Score_Numeric"] = df_train["Credit_Score"].map(mapping)
 df_train = df_train.dropna(subset=["Credit_Score_Numeric"])
 target_column = "Credit_Score_Numeric"
 print("Target value counts after mapping:")
 print(df_train[target_column].value_counts())
+print(f"Total rows with numerical credit scores: {len(df_train)}")
 y_train = df_train[target_column].values
 
 # =====================================
@@ -109,10 +113,65 @@ predictions = np.clip(predictions, 350, 850)
 predictions = np.round(predictions).astype(int)
 
 # =====================================
-# 8. Assign Unique Customer IDs and Save Final Output
+# 8. Calculate Accuracy Metrics
+# =====================================
+if "Credit_Score" in df_test.columns:
+    # Define the score ranges for classification
+    def get_credit_level(score):
+        if 350 <= score <= 599:
+            return "Poor"
+        elif 600 <= score <= 700:
+            return "Standard"
+        else:
+            return "Good"
+    
+    # Convert numeric predictions to credit levels
+    predicted_levels = [get_credit_level(score) for score in predictions]
+    actual_levels = df_test["Credit_Score"].values
+    
+    # Calculate accuracy
+    correct_predictions = sum(p == a for p, a in zip(predicted_levels, actual_levels))
+    accuracy = (correct_predictions / len(actual_levels)) * 100
+    
+    print("\nAccuracy Metrics:")
+    print(f"Exact Level Match Accuracy: {accuracy:.2f}%")
+    
+# =====================================
+# 9. Save Final Output
 # =====================================
 df_test["tgam_score"] = predictions
 df_test["customer_id"] = ['C' + str(i).zfill(5) for i in range(1, len(df_test) + 1)]
 final_df = df_test[["customer_id", "tgam_score"]]
-final_df.to_csv("final_credit_scores_tgam.csv", index=False)
-print("Final TGAMT output saved to final_credit_scores_tgam.csv")
+final_df.to_csv("credit_scores_asfi.csv", index=False)
+print("\nFinal TGAMT output saved to credit_scores_asfi.csv")
+
+# =====================================
+# 10. Save Model Components with Pickle
+# =====================================
+model_components = {
+    'tree': tree,
+    'leaf_gams': leaf_gams,
+    'imputer': imputer,
+    'numeric_features': numeric_features,
+    'unique_leaves': unique_leaves
+}
+
+# Create absolute path for models directory
+base_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+models_dir = os.path.join(base_dir, "models")
+model_path = os.path.join(models_dir, "tgamt_model.pkl")
+
+try:
+    # Create models directory if it doesn't exist
+    os.makedirs(models_dir, exist_ok=True)
+    print(f"Models directory created/verified at: {models_dir}")
+
+    # Save the model components
+    with open(model_path, "wb") as f:
+        pickle.dump(model_components, f)
+    
+    print(f"Model components successfully saved to: {model_path}")
+    
+except Exception as e:
+    print(f"Error saving model: {str(e)}")
+    print(f"Attempted to save to: {model_path}")
